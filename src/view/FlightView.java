@@ -5,10 +5,7 @@
  */
 package view;
 
-import java.util.ArrayList;
-import javax.swing.table.DefaultTableModel;
-import model.*;
-import dao.*;
+import controller.FlightController;
 
 /**
  *
@@ -16,48 +13,16 @@ import dao.*;
  */
 public class FlightView extends javax.swing.JPanel {
 
+    FlightController flightController = new FlightController();
+    
     /**
      * Creates new form FlightView
      */
     public FlightView() {
         initComponents();
-        addRowTable();
-        
+       jt_listFlight = flightController.addRowTable(jt_listFlight);
     }
     
-    public void addRowTable(){
-        DefaultTableModel model = (DefaultTableModel) jt_listFlight.getModel();
-            AirportDAO airportDAO = new AirportDAO();    
-        FlightDAO flightDAO = new FlightDAO();
-        ArrayList<Flight> list_flights = flightDAO.getAll();
-        
-        Object rowData[] = new Object[11];
-        
-        
-        for (Flight flight : list_flights) {
-           Airport startAirport =  airportDAO.find(flight.getDeparting_aita());
-           Airport endAirport =  airportDAO.find(flight.getArrival_aita());
-            String startCity = startAirport.getCity();
-            String startCountry =   startAirport.getCountry();
-           String endCity = endAirport.getCity();
-           String endCountry = endAirport.getCountry();
-            rowData[0] = flight.getId();
-            rowData[1] = startCity;
-            rowData[2] = startCountry;
-            rowData[3] = flight.getDeparting_aita();
-            rowData[4] = endCity;
-            rowData[5] = endCountry;
-            rowData[6] = flight.getArrival_aita();
-            rowData[7] = flight.getDeparting_hour();
-            rowData[8] = flight.getDeparting_hour();
-            rowData[9] = flight.getDuration();
-            rowData[10] = flight.getPrice();
-            
-            model.addRow(rowData);
-        }
-        
-        
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -144,7 +109,7 @@ public class FlightView extends javax.swing.JPanel {
         jScrollPane1.setViewportView(jt_listFlight);
         if (jt_listFlight.getColumnModel().getColumnCount() > 0) {
             jt_listFlight.getColumnModel().getColumn(0).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(0).setPreferredWidth(40);
+            jt_listFlight.getColumnModel().getColumn(0).setPreferredWidth(45);
             jt_listFlight.getColumnModel().getColumn(1).setResizable(false);
             jt_listFlight.getColumnModel().getColumn(1).setPreferredWidth(125);
             jt_listFlight.getColumnModel().getColumn(2).setResizable(false);
