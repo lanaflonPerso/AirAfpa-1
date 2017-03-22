@@ -5,6 +5,11 @@
  */
 package view;
 
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
+import model.*;
+import dao.*;
+
 /**
  *
  * @author Cedric DELHOME
@@ -16,6 +21,42 @@ public class FlightView extends javax.swing.JPanel {
      */
     public FlightView() {
         initComponents();
+        addRowTable();
+        
+    }
+    
+    public void addRowTable(){
+        DefaultTableModel model = (DefaultTableModel) jt_listFlight.getModel();
+            AirportDAO airportDAO = new AirportDAO();    
+        FlightDAO flightDAO = new FlightDAO();
+        ArrayList<Flight> list_flights = flightDAO.getAll();
+        
+        Object rowData[] = new Object[11];
+        
+        
+        for (Flight flight : list_flights) {
+           Airport startAirport =  airportDAO.find(flight.getDeparting_aita());
+           Airport endAirport =  airportDAO.find(flight.getArrival_aita());
+            String startCity = startAirport.getCity();
+            String startCountry =   startAirport.getCountry();
+           String endCity = endAirport.getCity();
+           String endCountry = endAirport.getCountry();
+            rowData[0] = flight.getId();
+            rowData[1] = startCity;
+            rowData[2] = startCountry;
+            rowData[3] = flight.getDeparting_aita();
+            rowData[4] = endCity;
+            rowData[5] = endCountry;
+            rowData[6] = flight.getArrival_aita();
+            rowData[7] = flight.getDeparting_hour();
+            rowData[8] = flight.getDeparting_hour();
+            rowData[9] = flight.getDuration();
+            rowData[10] = flight.getPrice();
+            
+            model.addRow(rowData);
+        }
+        
+        
     }
 
     /**
@@ -75,24 +116,23 @@ public class FlightView extends javax.swing.JPanel {
         pb_delete = new javax.swing.JButton();
         pb_update = new javax.swing.JButton();
 
-        setLayout(new java.awt.GridLayout(2, 1));
+        setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 
-        jp_table.setPreferredSize(new java.awt.Dimension(1000, 431));
+        jp_table.setMaximumSize(new java.awt.Dimension(32767, 300));
+        jp_table.setMinimumSize(new java.awt.Dimension(1000, 300));
+        jp_table.setPreferredSize(new java.awt.Dimension(1000, 300));
         jp_table.setLayout(new java.awt.GridLayout());
 
         jt_listFlight.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5", "Title 6", "Title 7", "Title 8", "Title 9", "Title 10", "Title 11", "Title 12", "Title 13", "Title 14", "Title 15", "Title 16", "Title 17", "Title 18"
+                "N°", "Ville départ", "Pays départ", "Code départ", "Ville arrivée", "Pays arrivée", "Code arrivée", "Date / Heures départ", "Date / heure arrivée", "Durée (min)", "Tarif (€)"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -100,26 +140,31 @@ public class FlightView extends javax.swing.JPanel {
             }
         });
         jt_listFlight.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        jt_listFlight.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(jt_listFlight);
         if (jt_listFlight.getColumnModel().getColumnCount() > 0) {
             jt_listFlight.getColumnModel().getColumn(0).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(0).setPreferredWidth(40);
             jt_listFlight.getColumnModel().getColumn(1).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(1).setPreferredWidth(125);
             jt_listFlight.getColumnModel().getColumn(2).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(2).setPreferredWidth(125);
             jt_listFlight.getColumnModel().getColumn(3).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(3).setPreferredWidth(50);
             jt_listFlight.getColumnModel().getColumn(4).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(4).setPreferredWidth(125);
             jt_listFlight.getColumnModel().getColumn(5).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(5).setPreferredWidth(125);
             jt_listFlight.getColumnModel().getColumn(6).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(6).setPreferredWidth(50);
             jt_listFlight.getColumnModel().getColumn(7).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(7).setPreferredWidth(150);
             jt_listFlight.getColumnModel().getColumn(8).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(8).setPreferredWidth(150);
             jt_listFlight.getColumnModel().getColumn(9).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(9).setPreferredWidth(100);
             jt_listFlight.getColumnModel().getColumn(10).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(11).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(12).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(13).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(14).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(15).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(16).setResizable(false);
-            jt_listFlight.getColumnModel().getColumn(17).setResizable(false);
+            jt_listFlight.getColumnModel().getColumn(10).setPreferredWidth(100);
         }
 
         jp_table.add(jScrollPane1);
@@ -483,25 +528,28 @@ public class FlightView extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         jp_button.add(pb_init, gridBagConstraints);
 
         pb_delete.setText("supprimer");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         jp_button.add(pb_delete, gridBagConstraints);
 
         pb_update.setText("Mettre à jour");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         jp_button.add(pb_update, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(20, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
         jp_info.add(jp_button, gridBagConstraints);
 
         add(jp_info);
