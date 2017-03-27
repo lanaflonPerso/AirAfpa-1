@@ -40,7 +40,6 @@ public class WelcomeView extends javax.swing.JDialog {
 //        super(parent, modal);
 //        initComponents();
 //    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -202,10 +201,11 @@ public class WelcomeView extends javax.swing.JDialog {
 
     private void pb_connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pb_connectActionPerformed
         // assign login and password entered by the user
-        String login = this.tf_login.getText();
-        String password = String.valueOf(this.pf_password.getPassword());
+        String login = this.tf_login.getText().replaceAll("\\s+", "");
+        String password = String.valueOf(this.pf_password.getPassword()).replaceAll("\\s+", "");
         // Session is blocked
         if (!this.welcomeController.checkTryNumber()) {
+            
             this.optionPane.showMessageDialog(this, this.welcomeController.getErrorMessageContent(), this.welcomeController.getErrorMessageTitle(), this.optionPane.ERROR_MESSAGE);
             System.exit(0);
         } // login or password is incorrect
@@ -217,59 +217,83 @@ public class WelcomeView extends javax.swing.JDialog {
 
             // TODO code application logic here
             this.dispose();
-            
+
             if (this.welcomeController.getHasChanged()) {
-               
+
                 boolean confirmationPassword = false;
-                
-               do{
-                  
-                
-                    String newPassword = JOptionPane.showInputDialog(
-                        this,
-                        "Veuillez Saisir un nouveau mot de passe",
-                        "Nouveau mot de passe",
-                        JOptionPane.WARNING_MESSAGE
-                );
-            
-                
-                String newPasswordConfirm= JOptionPane.showInputDialog(
-                        this,
-                        "Confirmation du nouveau mot de passe",
-                        "Confirmation du nouveau mot de passe",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                   System.out.println(newPassword);
-                                      System.out.println(newPasswordConfirm);
-                if(newPassword.equals(newPasswordConfirm)){
-                    confirmationPassword = true;
-                    
-                }
-               }while(!confirmationPassword);
- 
-                
-            } 
 
-                JFrame frame = new JFrame();
+                do {
+                    String newPassword = null;
+                    do {
+                        newPassword = JOptionPane.showInputDialog(
+                                this,
+                                "Veuillez Saisir un nouveau mot de passe",
+                                "Nouveau mot de passe",
+                                JOptionPane.WARNING_MESSAGE
+                        );
 
-                FlightView flightView = new FlightView();
+                        newPassword = newPassword.replaceAll("\\s+", "");
+                    } while (newPassword == null || newPassword.isEmpty());
 
-                frame.setTitle("Vols");
-                frame.setSize(1000, 691);
+                    String newPasswordConfirm = null;
+                    do {
+                        newPasswordConfirm = JOptionPane.showInputDialog(
+                                this,
+                                "Confirmation du nouveau mot de passe",
+                                "Confirmation du nouveau mot de passe",
+                                JOptionPane.WARNING_MESSAGE
+                        );
+                        newPasswordConfirm = newPasswordConfirm.replaceAll("\\s+", "");
+                        System.out.println(newPasswordConfirm.isEmpty());
+                    } while (newPasswordConfirm == null || newPasswordConfirm.isEmpty());
+                    System.out.println(newPassword);
+                    System.out.println(newPasswordConfirm);
 
-                frame.setResizable(false);
-                frame.setLocationRelativeTo(null);
-                frame.setLocation(450, 110);
+                    if (newPassword.equals(newPasswordConfirm)) {
+                        confirmationPassword = true;
 
-                frame.add(flightView);
+                    }
+                } while (!confirmationPassword);
 
-                frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-                frame.setVisible(true);
+            }
 
-         
+            JFrame frame = new JFrame();
+
+            FlightView flightView = new FlightView();
+
+            frame.setTitle("Vols");
+            frame.setSize(1000, 691);
+
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            frame.setLocation(450, 110);
+
+            frame.add(flightView);
+
+            frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+            frame.setVisible(true);
 
         }
     }//GEN-LAST:event_pb_connectActionPerformed
+
+    public void messageOptionPane(String statusMessage, String contentMessage, String titleMessage) {
+
+        switch (statusMessage) {
+            case "error":
+                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.ERROR_MESSAGE);
+                break;
+            case "warning":
+                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.WARNING_MESSAGE);
+                break;
+            case "information":
+                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.INFORMATION_MESSAGE);
+                break;
+            default:
+                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.PLAIN_MESSAGE);
+                break;
+        }
+
+    }
 
     /**
      * @param args the command line arguments
