@@ -25,7 +25,7 @@ public class AccessBackofficeDAOTest {
     public void testCreate() {
         System.out.println("create");
         // create object access_backoffice    
-        AccessBackoffice access_backoffice = new AccessBackoffice(6, "E00006", "user6");
+        AccessBackoffice access_backoffice = new AccessBackoffice(6, "E00006", "user6",false,false,true);
         AccessBackofficeDAO access_backofficeDAO = new AccessBackofficeDAO();
         // find access_backoffice  create 
         AccessBackoffice expResult = access_backofficeDAO.find(access_backoffice.getUser_id());
@@ -51,7 +51,7 @@ public class AccessBackofficeDAOTest {
     public void testUpdate() {
         System.out.println("update");
         // create object access_backoffice      
-        AccessBackoffice access_backofficeInsert = new AccessBackoffice(8, "U00008", "user8");
+        AccessBackoffice access_backofficeInsert = new AccessBackoffice(8, "U00008", "user8",false,false,false);
         // instatied access_backofficeDAO
         AccessBackofficeDAO access_backofficeDAO = new AccessBackofficeDAO();
         // find access_backoffice create 
@@ -83,7 +83,7 @@ public class AccessBackofficeDAOTest {
         AccessBackofficeDAO access_backofficeDAO = new AccessBackofficeDAO();
 
         // create object access_backoffice	
-        AccessBackoffice access_backofficeInsert = new AccessBackoffice(9, "U00009", "user9");
+        AccessBackoffice access_backofficeInsert = new AccessBackoffice(9, "U00009", "user9",false,false,false);
         // find access_backoffice  create 
         AccessBackoffice findAccessBackoffice = access_backofficeDAO.find(access_backofficeInsert.getUser_id());
    
@@ -129,7 +129,7 @@ public class AccessBackofficeDAOTest {
         long primary_key = 96;
         // assign result exemple
         String expResult = "AccessBackoffice{user_id=96, nickname=root, "
-                + "password=dc76e9f0c0006e8f919e0c515c66dbba3982f785}";
+                + "password=63a9f0ea7bb98050796b649e85481845}";
 
         // find access_backoffice
         String result = access_backofficeDAO.find(primary_key).toString();

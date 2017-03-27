@@ -5,8 +5,12 @@
  */
 package airafpa;
 
+import controller.WelcomeController;
+import dao.AccessBackofficeDAO;
+import view.WelcomeView;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import model.AccessBackoffice;
 import view.FlightView;
 
 /**
@@ -21,22 +25,10 @@ public class AirAfpa {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        JFrame frame = new JFrame();
-        
-      FlightView flightView =  new FlightView();
-      
-      frame.setTitle("C'est plus, C'est moins");
-        frame.setSize(1000, 691);
-//        this.setMinimumSize(new Dimension(340, 480));
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
-        frame.setLocation(450, 110);
-        
-        frame.add(flightView);
+            AccessBackofficeDAO accessBackofficeDAO = new AccessBackofficeDAO();
+            WelcomeController welcomeController = new WelcomeController(accessBackofficeDAO);
+           new WelcomeView(welcomeController);  
 
-        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        frame.setVisible(true);
+ 
     }
-    
 }
