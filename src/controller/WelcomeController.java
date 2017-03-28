@@ -22,6 +22,7 @@ import model.User;
 public class WelcomeController {
 
     private AccessBackofficeDAO accessBackofficeDAO;
+    private AccessBackoffice currentUser;
     private String errorMessageContent;
     private String errorMessageTitle;
     private int numberTry;
@@ -30,6 +31,7 @@ public class WelcomeController {
 
     public WelcomeController(AccessBackofficeDAO accessBackofficeDAO) {
         this.accessBackofficeDAO = accessBackofficeDAO;
+        this.currentUser = new AccessBackoffice();
         this.errorMessageContent = "";
         this.errorMessageTitle = "Login | Password";
         this.numberTry = 0;
@@ -47,35 +49,36 @@ public class WelcomeController {
         // login and password is empty
         if (login.isEmpty() && password.isEmpty()) {
             checkLoginPassword = false;
-            this.errorMessageContent = "Veuillez saisir un identifiant et un mot de passe";
+            this.errorMessageContent = "Veuillez saisir un identifiant et un mot de passe.";
         }// login is empty 
         else if (login.isEmpty()) {
             checkLoginPassword = false;
-            this.errorMessageContent = "Veuillez saisir un identifiant";
+            this.errorMessageContent = "Veuillez saisir un identifiant.";
         } // password is empty 
         else if (password.isEmpty()) {
             checkLoginPassword = false;
-            this.errorMessageContent = "Veuillez saisir un mot de passe";
+            this.errorMessageContent = "Veuillez saisir un mot de passe.";
 
         } else {
             // find login in table Access Backoffie
-            AccessBackoffice loginAccessBackoffice = this.accessBackofficeDAO.find(login);
+            this.currentUser = this.accessBackofficeDAO.find(login);
             // login is not found
-            if (!this.accessBackofficeDAO.isValid(loginAccessBackoffice)) {
+            if (!this.accessBackofficeDAO.isValid(this.currentUser)) {
                 checkLoginPassword = false;
-                this.errorMessageContent = "Identifiant inconnu !!!";
+                this.errorMessageContent = "Identifiant ou Mot de passe incorrect.";
             }// session is blocked
-            else if (loginAccessBackoffice.isIsBlocked()) {
+            else if (this.currentUser.isIsBlocked()) {
                 checkLoginPassword = false;
-                this.errorMessageContent = "Trop de tentative !!!";
+                
+                this.errorMessageContent = "Votre compte est blocké, Veuillez contacter votre administrateur.";
                 this.numberTry = MAX_TRY;
 
             }// incorrect password  
-            else if (!loginAccessBackoffice.getPassword().equals(this.getMD5Hash(password))) {
+            else if (!this.currentUser.getPassword().equals(this.getMD5Hash(password))) {
                 checkLoginPassword = false;
-                this.errorMessageContent = "Identifiant ou Mot de passe incorrect !!!";
+                this.errorMessageContent = "Identifiant ou Mot de passe incorrect.";
             }else{
-              this.hasChanged = loginAccessBackoffice.isHasChanged();
+              this.hasChanged = this.currentUser.isHasChanged();
                 
             }
 
@@ -131,9 +134,45 @@ public class WelcomeController {
         boolean chekTryNumber = true;
         if (this.numberTry == MAX_TRY) {
             chekTryNumber = false;
-            this.errorMessageContent = "Trop de tentative !!!";
+                //current user is not in table
+            if(!this.accessBackofficeDAO.isValid(this.currentUser)){
+                   this.errorMessageContent = "Acces refuser.";
+                   System.exit(0);
+            }else{         
+                this.errorMessageContent = "Votre compte est blocké, veuillez contacter votre administrateur.";   
+                 // hasChanged is false
+                 if(!this.currentUser.isHasChanged()){                    
+
+                     // set hasChanged is true
+                     this.currentUser.setHasChanged(true);  
+                     this.currentUser.setPassword("");
+                     // update current user
+                    boolean isUpdate = this.accessBackofficeDAO.update(this.currentUser);
+                    // not update change message error
+                     if(!isUpdate){
+                              this.errorMessageContent = "Echec votre compte est blocké, veuillez contacter votre administrateur.";
+                     }
+                 }
+             
+             }
+            
         }
         return chekTryNumber;
+    }
+    /**
+     * Change password
+     * @param newPassword
+     * @return true update password and hasChanged or false not update
+     */
+    public boolean updatePassword(String newPassword){
+        boolean updatePassword = false;
+        // set hasChanged false
+        this.currentUser.setHasChanged(false);
+        // set new password
+        this.currentUser.setPassword(newPassword);
+        // update
+        updatePassword = accessBackofficeDAO.update(this.currentUser);        
+        return updatePassword;
     }
 
 }
