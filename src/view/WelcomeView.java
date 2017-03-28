@@ -5,20 +5,45 @@
  */
 package view;
 
+import controller.FlightController;
+import controller.WelcomeController;
+import dao.AccessBackofficeDAO;
+import dao.FlightDAO;
+import java.awt.GridLayout;
+import javax.swing.JFrame;
+import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import jdk.nashorn.internal.runtime.regexp.joni.EncodingHelper;
+
 /**
  *
  * @author Salim El Moussaoui <salim.elmoussaoui.afpa2017@gmail.com>
  */
 public class WelcomeView extends javax.swing.JDialog {
 
+    private WelcomeController welcomeController;
+    private JOptionPane optionPane = new JOptionPane();
+
     /**
      * Creates new form WelcomeView
      */
-    public WelcomeView(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public WelcomeView(WelcomeController welcomeController) {
+        this.welcomeController = welcomeController;
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
     }
 
+    /**
+     * Creates new form WelcomeView
+     */
+//    public WelcomeView(java.awt.Frame parent, boolean modal) {
+//        super(parent, modal);
+//        initComponents();
+//    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -38,10 +63,9 @@ public class WelcomeView extends javax.swing.JDialog {
         pb_connect = new java.awt.Button();
         img_logoLeft = new javax.swing.JLabel();
         img_logoRight = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        lb_information = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(800, 600));
         setResizable(false);
 
         jp_session.setBackground(new java.awt.Color(255, 255, 255));
@@ -118,7 +142,11 @@ public class WelcomeView extends javax.swing.JDialog {
         pb_connect.setForeground(new java.awt.Color(255, 255, 255));
         pb_connect.setLabel("Connecter");
         pb_connect.setMinimumSize(new java.awt.Dimension(150, 35));
-        pb_connect.setPreferredSize(new java.awt.Dimension(150, 35));
+        pb_connect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pb_connectActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -128,9 +156,6 @@ public class WelcomeView extends javax.swing.JDialog {
         jp_session.add(pb_connect, gridBagConstraints);
 
         img_logoLeft.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/logo.png"))); // NOI18N
-        img_logoLeft.setMaximumSize(new java.awt.Dimension(166, 173));
-        img_logoLeft.setMinimumSize(new java.awt.Dimension(166, 173));
-        img_logoLeft.setPreferredSize(new java.awt.Dimension(166, 173));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -146,15 +171,15 @@ public class WelcomeView extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(10, 15, 10, 30);
         jp_session.add(img_logoRight, gridBagConstraints);
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel1.setText("® DEV-FLY 2013 - Site Web http://dev.fly.fr");
+        lb_information.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        lb_information.setText("® DEV-FLY 2013 - Site Web http://dev.fly.fr");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
         gridBagConstraints.insets = new java.awt.Insets(45, 10, 10, 10);
-        jp_session.add(jLabel1, gridBagConstraints);
+        jp_session.add(lb_information, gridBagConstraints);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -178,6 +203,128 @@ public class WelcomeView extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_pf_passwordActionPerformed
 
+    private void pb_connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pb_connectActionPerformed
+        // assign login and password entered by the user
+        String login = this.tf_login.getText().replaceAll("\\s+", "");
+        String password = String.valueOf(this.pf_password.getPassword()).replaceAll("\\s+", "");
+        // Session is blocked
+        if (!this.welcomeController.checkTryNumber()) {
+            this.optionPane.showMessageDialog(this, this.welcomeController.getErrorMessageContent(), this.welcomeController.getErrorMessageTitle(), this.optionPane.ERROR_MESSAGE);
+        } // login or password is incorrect
+        else if (!this.welcomeController.checkLoginPassword(login, password)) {
+            this.optionPane.showMessageDialog(this, this.welcomeController.getErrorMessageContent(), this.welcomeController.getErrorMessageTitle(), this.optionPane.WARNING_MESSAGE);
+        } else {
+            this.tf_login.setText("");
+            this.pf_password.setText("");
+
+            // TODO code application logic here
+            this.dispose();
+
+            if (this.welcomeController.getHasChanged()) {
+                this.dialogChangePassword();
+            }
+
+            // return flight 
+            this.redirectFlightPlanned();
+
+        }
+    }//GEN-LAST:event_pb_connectActionPerformed
+    
+    public void redirectFlightPlanned(){
+        
+                   JFrame frame = new JFrame();
+
+            FlightView flightView = new FlightView();
+
+            frame.setTitle("Vols");
+            frame.setSize(1000, 691);
+
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            frame.setLocation(450, 110);
+
+            frame.add(flightView);
+
+            frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+            frame.setVisible(true); 
+        
+    }
+    /**
+     * Show Dialog for Change Password
+     */
+    public void dialogChangePassword() {
+
+        // create panel
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(2, 2));
+        // create label and field password for new password and confirm password
+        JLabel lb_newPassword = new JLabel("Nouveau mot de passe ");
+        JLabel lb_newPasswordConfirm = new JLabel("Confirmer votre mot de  passe ");
+        JPasswordField pf_newPassword = new JPasswordField(32);
+        JPasswordField pf_newPasswordConfirm = new JPasswordField(32);
+        // add label and field password for new password and confirm password in panel
+        panel.add(lb_newPassword);
+        panel.add(pf_newPassword);
+        panel.add(lb_newPasswordConfirm);
+        panel.add(pf_newPasswordConfirm);
+
+        // change button Option Pane
+        String[] options = new String[]{"Modifier", "Annuler"};
+
+        boolean invalidChangePassword = true;
+
+        do {
+
+            // Show Option Pane add insert panel
+            int option = this.optionPane.showOptionDialog(null, panel, "Mise à jour du mot de passe",
+                    JOptionPane.NO_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null, options, options[1]);
+
+            if (option == 0) // pressing Modifier button
+            {
+                // get new password and confirm password and trim space
+                String newPasswordString = String.valueOf(pf_newPassword.getPassword()).replaceAll("\\s+", "");
+                String newPasswordConfirmString = String.valueOf(pf_newPasswordConfirm.getPassword()).replaceAll("\\s+", "");
+                
+                // empty fields new password and password comfirm
+                pf_newPassword.setText("");
+                pf_newPasswordConfirm.setText("");
+                // new password and confirm password are empty
+                if (newPasswordString.isEmpty() || newPasswordConfirmString.isEmpty()) {
+                    this.optionPane.showMessageDialog(this, "Les mots de passe saisis sont invalide", "", this.optionPane.WARNING_MESSAGE);
+                    invalidChangePassword = true;
+                } else {
+                    // Entered passwords are not identical
+                    if (!newPasswordString.equals(newPasswordConfirmString)) {
+                        this.optionPane.showMessageDialog(this, "Les mots de passe saisis ne sont pas identiques", "", this.optionPane.WARNING_MESSAGE);
+                        invalidChangePassword = true;
+
+                    } else {
+                        // update new password
+                        boolean isUpdate = this.welcomeController.updatePassword(newPasswordString);
+                        // succes update
+                        if (isUpdate) {
+                            this.optionPane.showMessageDialog(this, "Votre nouveau mot passe a bien été modifié", "", this.optionPane.INFORMATION_MESSAGE);
+                            invalidChangePassword = false;
+                        } else {
+
+                            this.optionPane.showMessageDialog(this, "Echec lors de la modification, Veuillez contactez-votre administrateur", "", this.optionPane.WARNING_MESSAGE);
+                            System.exit(0);
+                        }
+
+                    }
+
+                }
+
+            } else { // pressing Annuler button
+                this.optionPane.showMessageDialog(this, "Vous devez obligatoirement changer le mot de passe provisoir pour continuez, le programme va s'arreter", "", this.optionPane.WARNING_MESSAGE);
+                System.exit(0);
+            }
+        } while (invalidChangePassword);
+
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -187,28 +334,32 @@ public class WelcomeView extends javax.swing.JDialog {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                WelcomeView dialog = new WelcomeView(new javax.swing.JFrame(), true);
+//                WelcomeView dialog = new WelcomeView(new javax.swing.JFrame(), true);
+
+                AccessBackofficeDAO accessBackofficeDAO = new AccessBackofficeDAO();
+                WelcomeController welcomeController = new WelcomeController(accessBackofficeDAO);
+                WelcomeView dialog = new WelcomeView(welcomeController);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -223,8 +374,8 @@ public class WelcomeView extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel img_logoLeft;
     private javax.swing.JLabel img_logoRight;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jp_session;
+    private javax.swing.JLabel lb_information;
     private javax.swing.JLabel lb_login;
     private javax.swing.JLabel lb_password;
     private javax.swing.JLabel lb_welcome;
