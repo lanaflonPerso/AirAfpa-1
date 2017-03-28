@@ -9,9 +9,13 @@ import controller.FlightController;
 import controller.WelcomeController;
 import dao.AccessBackofficeDAO;
 import dao.FlightDAO;
+import java.awt.GridLayout;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import jdk.nashorn.internal.runtime.regexp.joni.EncodingHelper;
 
 /**
@@ -205,9 +209,7 @@ public class WelcomeView extends javax.swing.JDialog {
         String password = String.valueOf(this.pf_password.getPassword()).replaceAll("\\s+", "");
         // Session is blocked
         if (!this.welcomeController.checkTryNumber()) {
-            
             this.optionPane.showMessageDialog(this, this.welcomeController.getErrorMessageContent(), this.welcomeController.getErrorMessageTitle(), this.optionPane.ERROR_MESSAGE);
-            System.exit(0);
         } // login or password is incorrect
         else if (!this.welcomeController.checkLoginPassword(login, password)) {
             this.optionPane.showMessageDialog(this, this.welcomeController.getErrorMessageContent(), this.welcomeController.getErrorMessageTitle(), this.optionPane.WARNING_MESSAGE);
@@ -219,45 +221,18 @@ public class WelcomeView extends javax.swing.JDialog {
             this.dispose();
 
             if (this.welcomeController.getHasChanged()) {
-
-                boolean confirmationPassword = false;
-
-                do {
-                    String newPassword = null;
-                    do {
-                        newPassword = JOptionPane.showInputDialog(
-                                this,
-                                "Veuillez Saisir un nouveau mot de passe",
-                                "Nouveau mot de passe",
-                                JOptionPane.WARNING_MESSAGE
-                        );
-
-                        newPassword = newPassword.replaceAll("\\s+", "");
-                    } while (newPassword == null || newPassword.isEmpty());
-
-                    String newPasswordConfirm = null;
-                    do {
-                        newPasswordConfirm = JOptionPane.showInputDialog(
-                                this,
-                                "Confirmation du nouveau mot de passe",
-                                "Confirmation du nouveau mot de passe",
-                                JOptionPane.WARNING_MESSAGE
-                        );
-                        newPasswordConfirm = newPasswordConfirm.replaceAll("\\s+", "");
-                        System.out.println(newPasswordConfirm.isEmpty());
-                    } while (newPasswordConfirm == null || newPasswordConfirm.isEmpty());
-                    System.out.println(newPassword);
-                    System.out.println(newPasswordConfirm);
-
-                    if (newPassword.equals(newPasswordConfirm)) {
-                        confirmationPassword = true;
-
-                    }
-                } while (!confirmationPassword);
-
+                this.dialogChangePassword();
             }
 
-            JFrame frame = new JFrame();
+            // return flight 
+            this.redirectFlightPlanned();
+
+        }
+    }//GEN-LAST:event_pb_connectActionPerformed
+    
+    public void redirectFlightPlanned(){
+        
+                   JFrame frame = new JFrame();
 
             FlightView flightView = new FlightView();
 
@@ -271,27 +246,82 @@ public class WelcomeView extends javax.swing.JDialog {
             frame.add(flightView);
 
             frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-            frame.setVisible(true);
+            frame.setVisible(true); 
+        
+    }
+    /**
+     * Show Dialog for Change Password
+     */
+    public void dialogChangePassword() {
 
-        }
-    }//GEN-LAST:event_pb_connectActionPerformed
+        // create panel
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(2, 2));
+        // create label and field password for new password and confirm password
+        JLabel lb_newPassword = new JLabel("Nouveau mot de passe ");
+        JLabel lb_newPasswordConfirm = new JLabel("Confirmer votre mot de  passe ");
+        JPasswordField pf_newPassword = new JPasswordField(32);
+        JPasswordField pf_newPasswordConfirm = new JPasswordField(32);
+        // add label and field password for new password and confirm password in panel
+        panel.add(lb_newPassword);
+        panel.add(pf_newPassword);
+        panel.add(lb_newPasswordConfirm);
+        panel.add(pf_newPasswordConfirm);
 
-    public void messageOptionPane(String statusMessage, String contentMessage, String titleMessage) {
+        // change button Option Pane
+        String[] options = new String[]{"Modifier", "Annuler"};
 
-        switch (statusMessage) {
-            case "error":
-                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.ERROR_MESSAGE);
-                break;
-            case "warning":
-                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.WARNING_MESSAGE);
-                break;
-            case "information":
-                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.INFORMATION_MESSAGE);
-                break;
-            default:
-                this.optionPane.showMessageDialog(this, contentMessage, titleMessage, this.optionPane.PLAIN_MESSAGE);
-                break;
-        }
+        boolean invalidChangePassword = true;
+
+        do {
+
+            // Show Option Pane add insert panel
+            int option = this.optionPane.showOptionDialog(null, panel, "Mise à jour du mot de passe",
+                    JOptionPane.NO_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null, options, options[1]);
+
+            if (option == 0) // pressing Modifier button
+            {
+                // get new password and confirm password and trim space
+                String newPasswordString = String.valueOf(pf_newPassword.getPassword()).replaceAll("\\s+", "");
+                String newPasswordConfirmString = String.valueOf(pf_newPasswordConfirm.getPassword()).replaceAll("\\s+", "");
+                
+                // empty fields new password and password comfirm
+                pf_newPassword.setText("");
+                pf_newPasswordConfirm.setText("");
+                // new password and confirm password are empty
+                if (newPasswordString.isEmpty() || newPasswordConfirmString.isEmpty()) {
+                    this.optionPane.showMessageDialog(this, "Les mots de passe saisis sont invalide", "", this.optionPane.WARNING_MESSAGE);
+                    invalidChangePassword = true;
+                } else {
+                    // Entered passwords are not identical
+                    if (!newPasswordString.equals(newPasswordConfirmString)) {
+                        this.optionPane.showMessageDialog(this, "Les mots de passe saisis ne sont pas identiques", "", this.optionPane.WARNING_MESSAGE);
+                        invalidChangePassword = true;
+
+                    } else {
+                        // update new password
+                        boolean isUpdate = this.welcomeController.updatePassword(newPasswordString);
+                        // succes update
+                        if (isUpdate) {
+                            this.optionPane.showMessageDialog(this, "Votre nouveau mot passe a bien été modifié", "", this.optionPane.INFORMATION_MESSAGE);
+                            invalidChangePassword = false;
+                        } else {
+
+                            this.optionPane.showMessageDialog(this, "Echec lors de la modification, Veuillez contactez-votre administrateur", "", this.optionPane.WARNING_MESSAGE);
+                            System.exit(0);
+                        }
+
+                    }
+
+                }
+
+            } else { // pressing Annuler button
+                this.optionPane.showMessageDialog(this, "Vous devez obligatoirement changer le mot de passe provisoir pour continuez, le programme va s'arreter", "", this.optionPane.WARNING_MESSAGE);
+                System.exit(0);
+            }
+        } while (invalidChangePassword);
 
     }
 
@@ -304,23 +334,23 @@ public class WelcomeView extends javax.swing.JDialog {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(WelcomeView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
