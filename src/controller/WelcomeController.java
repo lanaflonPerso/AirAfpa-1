@@ -143,7 +143,7 @@ public class WelcomeController {
                  if(!this.currentUser.isHasChanged()){                    
 
                      // set hasChanged is true
-                     this.currentUser.setHasChanged(true);  
+                     this.currentUser.setIsBlocked(true);  
                      this.currentUser.setPassword("");
                      // update current user
                     boolean isUpdate = this.accessBackofficeDAO.update(this.currentUser);
@@ -167,6 +167,8 @@ public class WelcomeController {
         boolean updatePassword = false;
         // set hasChanged false
         this.currentUser.setHasChanged(false);
+        // set isBlocked false
+        this.currentUser.setIsBlocked(false);
         // set new password
         this.currentUser.setPassword(newPassword);
         // update
